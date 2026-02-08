@@ -983,6 +983,9 @@ export async function monitorMattermostProvider(opts: MonitorMattermostOpts = {}
               reaction = reactionData;
             }
             if (!reaction) {
+              logVerboseMessage(
+                `mattermost: ${payload.event} reaction data shape mismatch, skipping`,
+              );
               return;
             }
 
@@ -1019,11 +1022,10 @@ export async function monitorMattermostProvider(opts: MonitorMattermostOpts = {}
             }
 
             const channelInfo = await resolveChannelInfo(channelId);
-            const channelType = channelInfo?.type ?? undefined;
+            const channelType = payload.data?.channel_type ?? channelInfo?.type ?? undefined;
             const kind = channelKind(channelType);
 
-            const actorName =
-              (await resolveUserInfo(actorId))?.username?.trim() || actorId || "user";
+            const actorName = (await resolveUserInfo(actorId))?.username?.trim() || actorId;
             const dmPolicy = account.config.dmPolicy ?? "pairing";
             const defaultGroupPolicy = cfg.channels?.defaults?.groupPolicy;
             const groupPolicy = account.config.groupPolicy ?? defaultGroupPolicy ?? "allowlist";
